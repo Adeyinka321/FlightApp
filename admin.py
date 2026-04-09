@@ -7,6 +7,8 @@ master.title('Admin Dashboard')
 master.configure(background = '#141444')
 search_visible = False
 import subprocess
+from tkinter import ttk
+from tkinter import END
 
 #CRUD
 # C = CREATE
@@ -16,6 +18,21 @@ import subprocess
 
 def frontdesk():
     subprocess.Popen(['python', 'office.py'])
+
+
+def fetch_data():
+    con = sqlite3.connect('airline.db')
+    cur = con.cursor()
+    cur.execute('''
+                select * from flights
+                ''')
+    rows = cur.fetchall()
+    con.close
+    return rows
+
+def display_data():
+    for row in fetch_data():
+        tree.insert('', END, value = row)
 
 
 def add():
@@ -34,7 +51,7 @@ def add():
         cur.execute('''
                 insert into flights(flight_number, origin, departure_time, arrival_time, destination)
                     values(?,?,?,?,?)''', (flight_number, origin, departure_time, arrival_time, destination))
-        
+    
         message.showinfo('Alert', 'Record sent to Flight Table')
         con.commit()
         con.close()
@@ -207,8 +224,19 @@ labelfront.place(x = 600, y = 70)
 rightframe = tk.Frame(master, width = 500, height = 1000, bg = '#80184C')
 rightframe.place(x = 500, y = 150)
 
+labelright = tk.Label(rightframe, text = 'flight booking')
+labelright.place(x = 0, y = 0)
+cols = ['ID', 'Flight Number', 'Origin', 'Departure Time', 'Arrival Time', 'Destination']
+tree = ttk.Treeview(rightframe, column = cols, show = 'headings')
+
+for col in cols:
+    tree.heading(col, text = col)
+    tree.column(col, width = 80)
+
+tree.place(x = 0, y = 50)
 
 
+display_data()
 
 
 
